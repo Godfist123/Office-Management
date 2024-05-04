@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.as.dao.FileInfoMapper">
+
+	<!-- 两个以上参数省略parameterType -->
+
+
+	<!-- sql片段：可提取公共部分,利于代码重用 -->
+	<sql id="share_sql">
+		<where>
+			<if test="fileInfo.filename!=null and fileInfo.filename!=''">
+				and filename like concat('%',#{fileInfo.filename},'%')
+			</if>
+			<if test="fileInfo.empname!=null and fileInfo.empname!=''">
+				and empname like concat('%',#{fileInfo.empname},'%')
+			</if>
+			<if test="fileInfo.departname!=null and fileInfo.departname!=''">
+				and departname like concat('%',#{fileInfo.departname},'%')
+			</if>
+		</where>
+	</sql>
+
+	<!-- 新增 -->
+	<!-- 获取自增长的值: useGeneratedKeys="true" keyProperty="empid" keyColumn="empid" -->
+	<insert id="insert" parameterType="com.as.domain.FileInfo"
+		useGeneratedKeys="true" keyProperty="fileid" keyColumn="fileid">
+		insert into fileinfo (filename,fileurl,filedesc,empid,filesize) values
+		(#{filename},#{fileurl},#{filedesc},#{empid},#{filesize})
+	</insert>
+
+	<!-- 删除 -->
+	<delete id="delete" parameterType="int">
+		delete from fileinfo where fileid=#{fileid}
+	</delete>
+
+	<!-- 下载次数增加 -->
+	<update id="update" parameterType="int">
+		update fileinfo set count=count+1 where fileid=#{fileid}
+	</update>
+
+	<!-- 分页条件查询 -->
+	<select id="select" resultType="com.as.domain.FileInfo">
+		select * from viewfileinfo
+		<include refid="share_sql"></include>
+		order by posttime desc
+		<if test="skip>=0">
+			limit #{skip},#{take}
+		</if>
+	</select>
+
+	<!-- 获取记录条数 -->
+	<select id="getRowCount" resultType="int"
+		parameterType="com.as.domain.FileInfo">
+		select count(*) from viewfileinfo
+		<include refid="share_sql"></include>
+	</select>
+
+	<!-- 根据id查询 -->
+	<select id="selectOne" resultType="com.as.domain.FileInfo"
+		parameterType="int">
+		select * from viewfileinfo where fileid=#{fileid}
+	</select>
+
+
+	<!-- 批量删除 -->
+	<delete id="deleteAll" parameterType="int[]">
+		delete from fileinfo where fileid in
+		<foreach collection="fileids" item="fileid" open="(" close=")"
+			separator=",">
+			#{fileid}
+		</foreach>
+	</delete>
+
+</mapper> 

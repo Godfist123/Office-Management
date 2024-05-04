@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.as.dao.AddressMapper">
+
+	<!-- 两个以上参数省略parameterType -->
+
+
+	<!-- sql片段：可提取公共部分,利于代码重用 -->
+	<sql id="share_sql">
+		<where>
+			<if test="address.name!=null and address.name!=''">
+				and name like concat('%',#{address.name},'%')
+			</if>
+			<if test="address.companyname!=null and address.companyname!=''">
+				and companyname like concat('%',#{address.companyname},'%')
+			</if>
+			<if test="address.groupid!=null and address.groupid!=0">
+				and groupid=#{address.groupid}
+			</if>
+		</where>
+	</sql>
+	
+	<!--新增  -->
+	<!-- 获取自增长的值: useGeneratedKeys="true" keyProperty="addressid" keyColumn="addressid" -->
+	<insert id="insert" parameterType="com.as.domain.Address">
+		insert into address
+		(empid,groupid,name,gender,birthday,departname,position,companyname,tel,mobile,familytel,email,homeaddress)
+		values
+		(#{empid},#{groupid},#{name},#{gender},#{birthday},#{departname},#{position},#{companyname},#{tel},#{mobile},#{familytel},#{email},#{homeaddress})
+	</insert>
+	
+	<!--删除  -->
+	<delete id="delete" parameterType="int">
+		delete from address where addressid=#{addressid}
+	</delete>
+	
+	<!--修改  -->
+	<update id="update" parameterType="com.as.domain.Address">
+		update address set empid=#{empid},groupid=#{groupid},name=#{name},gender=#{gender},birthday=#{birthday},marry=#{marry},departname=#{departname},position=#{position},companyname=#{companyname},tel=#{tel},mobile=#{mobile},familytel=#{familytel},email=#{email},homeaddress=#{homeaddress}
+		where addressid=#{addressid}
+	</update>
+	
+	<!--条件查询  -->
+	<select id="select" resultType="com.as.domain.Address">
+		select * from viewaddress
+		<include refid="share_sql"></include>
+		order by addtime desc
+		<if test="skip>=0">
+		limit #{skip},#{take}
+		</if>
+	</select>
+	
+	<!--获取记录条数  -->
+	<select id="getRowCount" resultType="int" parameterType="com.as.domain.Address">
+		select count(*) from viewaddress
+		<include refid="share_sql"></include>
+	</select>
+	
+	<!-- 根据id查询 -->
+	<select id="selectById" resultType="com.as.domain.Address" parameterType="int">
+		select * from viewaddress where addressid=#{addressid}
+	</select>
+	
+	<!--批量删除  -->
+	<delete id="deleteAll" parameterType="int[]">
+		delete from address where addressid in
+		<foreach collection="addressids" item="addressid" open="(" close=")" separator=",">
+			#{addressid}
+		</foreach>
+	</delete>
+	
+	
+
+
+</mapper> 

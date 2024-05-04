@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.as.dao.NewsMapper">
+
+	<!-- 两个以上参数省略parameterType -->
+
+
+	<!-- sql片段：可提取公共部分,利于代码重用 -->
+	<sql id="share_sql">
+		<where>
+			<if test="news.newstitle!=null and news.newstitle!=''">
+				and newstitle like concat('%',#{news.newstitle},'%')
+			</if>
+			<if test="news.newscontent!=null and news.newscontent!=''">
+				and newscontent like concat('%',#{news.newscontent},'%')
+			</if>
+			<if test="news.empname!=null and news.empname!=''">
+				and empname like concat('%',#{news.empname},'%')
+			</if>
+			<if test="news.newsparentid!=null and news.newsparentid!=0">
+				and newsparentid=#{news.newsparentid}
+			</if>
+			<if test="news.state!=null and news.state!='-1'">
+				and state=#{news.state}
+			</if>				
+		</where>
+	</sql>
+	
+	
+	<!-- 获取自增长的值:	useGeneratedKeys="true" keyProperty="empid" keyColumn="empid" -->
+	<insert id="insert" parameterType="com.as.domain.News" useGeneratedKeys="true" keyProperty="newsid" keyColumn="newsid">
+		insert into news (newsparentid,newstitle,newscontent,empid) values(#{newsparentid},#{newstitle},#{newscontent},#{empid})
+	</insert>
+	
+	<update id="update"  parameterType="com.as.domain.News">
+		update news set newsparentid=#{newsparentid},newstitle=#{newstitle},newscontent=#{newscontent},empid=#{empid},state=#{state} where newsid=#{newsid}
+	</update>
+	
+	<delete id="delete" parameterType="int">
+		delete from news where newsid=#{newsid}
+	</delete>
+	
+	<select id="select" resultType="com.as.domain.News" >
+		select * from viewnews
+		<include refid="share_sql"></include>
+		order by publishtime desc
+		<if test="skip>=0">
+			limit #{skip},#{take}		
+		</if>
+	</select>
+	
+	<select id="getRowCount" resultType="int" parameterType="com.as.domain.News">
+		select count(*) from viewnews
+		<include refid="share_sql"></include>
+	</select>
+	
+	<!-- 根据id查询 -->
+	<select id="selectById" parameterType="int"
+		resultType="com.as.domain.News">
+		select * from viewnews where newsid=#{newsid}
+	</select>
+	
+	<!-- 批量删除 -->
+	<delete id="deleteAll" parameterType="int[]">
+		delete from news where newsid in
+		<foreach collection="newsids" item="newsid" open="(" close=")" separator=",">
+			#{newsid}
+		</foreach>
+	</delete>
+	
+	<!-- 审核 -->
+	<update id="examine"  parameterType="com.as.domain.News">
+		update news set state=if(state=0,1,0) where newsid=#{newsid}
+	</update>
+	
+
+</mapper> 

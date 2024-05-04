@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.as.dao.ScheduleMapper">
+
+	<!-- 两个以上参数省略parameterType -->
+	<!-- scheduleid,addtime,title,empid,begintime,endtime,content,concatname,address,tel,demo,ifprivate,state -->
+
+	<!-- sql片段：可提取公共部分,利于代码重用 -->
+	<sql id="share_sql">
+		<where>
+			<if test="schedule.title!=null and schedule.title!=''">
+				and title like concat('%',#{schedule.title},'%')
+			</if>
+			<if test="schedule.begintime!=null and schedule.begintime!=''">
+				and begintime &gt;=#{schedule.begintime}
+			</if>
+			<if test="schedule.endtime!=null and schedule.endtime!=''">
+				and endtime &lt;=#{schedule.endtime}
+			</if>
+			<if test="schedule.state!=null and schedule.state!=0">
+				and state=#{schedule.state}
+			</if>
+			<if test="schedule.empid!=null and schedule.empid!=0">
+				and (empid=#{schedule.empid} or ifprivate=2)
+			</if>
+		</where>
+	</sql>
+
+	<!-- 新增 -->
+	<!-- 获取自增长的值: useGeneratedKeys="true" keyProperty="empid" keyColumn="empid" -->
+	<insert id="insert" parameterType="com.as.domain.Schedule"
+		useGeneratedKeys="true" keyProperty="fileid" keyColumn="fileid">
+		insert into Schedule
+		(title,begintime,endtime,empid,content,concatname,address,tel,demo)
+		values
+		(#{title},#{begintime},#{endtime},#{empid},#{content},#{concatname},#{address},#{tel},#{demo})
+	</insert>
+
+	<!-- 删除 -->
+	<delete id="delete" parameterType="int">
+		delete from Schedule where scheduleid=#{scheduleid}
+	</delete>
+	
+	<!-- 修改 -->
+	<update id="update" parameterType="com.as.domain.Schedule">
+		update Schedule set
+		title=#{title},begintime=#{begintime},endtime=#{endtime},content=#{content},concatname=#{concatname},address=#{address},tel=#{tel},demo=#{demo},ifprivate=#{ifprivate},state=#{state}
+		where scheduleid=#{scheduleid}
+	</update>
+
+	<!-- 分页条件查询 -->
+	<select id="select" resultType="com.as.domain.Schedule">
+		select * from viewSchedule
+		<include refid="share_sql"></include>
+		<if test="skip>=0">
+			limit #{skip},#{take}
+		</if>
+	</select>
+
+	<!-- 获取记录条数 -->
+	<select id="getRowCount" resultType="int"
+		parameterType="com.as.domain.Schedule">
+		select count(*) from viewSchedule
+		<include refid="share_sql"></include>
+	</select>
+	
+	<!-- 根据id查询 -->
+	<select id="selectOne" resultType="com.as.domain.Schedule"
+		parameterType="int">
+		select * from viewSchedule where scheduleid=#{scheduleid}
+	</select>
+	
+	<!-- 批量删除 -->
+	<delete id="deleteAll" parameterType="int[]">
+		delete from Schedule where scheduleid in 
+		<foreach collection="scheduleids" item="scheduleid" open="(" close=")" separator=",">
+			#{scheduleid}
+		</foreach>
+	</delete>
+
+
+</mapper> 

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.as.dao.SignMapper">
+
+
+<!-- sql片段：可提取公共部分,利于代码重用 -->
+<sql id="share_sql">
+	<where>
+		<if test="sign.begintime!=null and sign.begintime!=''">
+			and signtime &gt;=#{sign.begintime}
+		</if>
+		<if test="sign.endtime!=null and sign.endtime!=''">
+			and signtime &lt;=#{sign.endtime}
+		</if>
+		<if test="sign.departid!=null and sign.departid!=0">
+			and departid=#{sign.departid}
+		</if>		
+		<if test="sign.empname!=null and sign.empname!=''">
+			and empname like concat('%',#{sign.empname},'%')
+		</if>	
+		<if test="sign.empid!=null and sign.empid!=0">
+			and empid=#{sign.empid}
+		</if>	
+	</where>
+</sql>
+
+
+<!-- 分页条件查询 -->
+<select id="select" resultType="com.as.domain.Sign">
+	select distinct empid,signtag,empname,departname from viewsign
+	<include refid="share_sql"></include>
+	<if test="skip>=0">
+		limit #{skip},#{take}
+	</if>
+</select>
+
+<!-- 获取记录数 -->
+<select id="getRowCount" resultType="int">
+	select count(distinct empid,signtag,empname,departname) from viewsign
+	<include refid="share_sql"></include>
+</select>
+
+<!-- 详情数据显示-->
+<select id="detail" resultType="com.as.domain.Sign">
+	select * from viewsign
+	<include refid="share_sql"></include>
+</select>
+
+<!--签到 -->
+<insert id="insert" parameterType="com.as.domain.Sign" >
+	insert into sign (empid,signtime,signdesc) values(#{empid},#{signtime},#{signdesc})
+</insert>
+
+<!--签退 -->
+<update id="update">
+	update sign set signtag=2,signdesc=#{signdesc} where empid=#{empid} and signtime=#{signtime}
+</update>
+
+<!-- 查询当前登录用户当天的签到状态 -->
+<select id="selectSignTag" resultType="int">
+	select signtag from viewsign where empid=#{empid} and signtime=#{signtime}
+</select>
+
+<!-- 实际出勤天数 -->
+<select id="getSignDay" resultType="int">
+	select count(*) from sign where signtag=2 and empid=#{empid} and signtime &gt;=#{begintime} and signtime &lt;=#{endtime}
+</select>
+
+
+</mapper> 

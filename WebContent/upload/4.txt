@@ -1,0 +1,39 @@
+数据库密码：111111   新版本可能是：123456 ？
+快捷键：fn+◀— ：跳到行首   然后  shift+fn+—▶：选中整行
+eclipse中万能注释：ctrl + shift + c
+生成表格快捷方法： table>tr*2>td*4    +tab键
+录屏：windows+alt+R	查看录屏：windows+G
+网页强制刷新  ctrl + F5
+
+
+列出数据库表中的所有字段的语句：
+select group_concat(column_name) from information_schema.COLUMNS where table_name='表名'
+
+1.     Class<Integer> cl    可写成    cl = Integer.class
+
+2.     Object obj=.....................
+        Integer.parseInt(obj.toString())
+
+        obj转换成string再转换成int类型
+
+3.     如果字符串不会改变就用String类，因为String对象是不可变的。
+       如果字符串可以改变并且在单线程中访问，使用StringBuilder。
+       如果字符串可以改变并且在多线程中访问，使用StringBuffer。
+       StringBuilder.append(  );   ：追加字符串方法
+
+4.    正则表达式中
+	\w：合法字符  \W不合法自负      合法：英文数字下划线
+	\d： 数字       \D：非数字
+	\s：空白字符   \S：非空白字符
+	{2}：前一项出现2次    {2，}：前一项出现2次以上
+	？  前一项可有可没有
+
+5.    	System.exit(0);  	正常退出
+	System.exit(1); 	强制退出
+
+6.    父类强转子类，必须在 ' 父类对象引用子类实例 ' 的情况下才可以
+
+7. $("input[name=c]:checked")  ：JQ中匹配被选中的“name=c”的input
+
+8.  字符串 . split(",")  ：根据 “，”拆分字符串，返回数组
+    数组 . join(",") : 根据 “，”拆分数组，返回字符串

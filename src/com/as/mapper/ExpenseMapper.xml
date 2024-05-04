@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.as.dao.ExpenseMapper">
+
+	<!-- 两个以上参数省略parameterType -->
+	<!-- expenseid,addtime,title,empid,begintime,endtime,content,concatname,address,tel,demo,ifprivate,state -->
+
+	<!-- sql片段：可提取公共部分,利于代码重用 -->
+	<sql id="share_sql">
+		<where>
+			<if test="expense.state!=null and expense.state!=0">
+				and state=#{expense.state}
+			</if>
+			<if test="expense.sugstate!=null and expense.sugstate!=0">
+				and sugstate=#{expense.sugstate}
+			</if>
+			<if test="expense.begintime!=null and expense.begintime!=''">
+				and date_format(addtime,'%Y-%m-%d')
+				&gt;=#{expense.begintime}
+			</if>
+			<if test="expense.endtime!=null and expense.endtime!=''">
+				and date_format(addtime,'%Y-%m-%d')
+				&lt;=#{expense.endtime}
+			</if>
+			<if test="expense.beginsugtime!=null and expense.beginsugtime!=''">
+				and sugtime &gt;=#{expense.beginsugtime}
+			</if>
+			<if test="expense.endsugtime!=null and expense.endsugtime!=''">
+				and sugtime &lt;=#{expense.endsugtime}
+			</if>
+			<if test="expense.reason!=null and expense.reason!=''">
+				and reason like concat('%',#{expense.reason},'%')
+			</if>
+			<if test="expense.empid!=null and expense.empid!=0">
+				and empid=#{expense.empid}
+			</if>
+			<if test="expense.confirmperson!=null and expense.confirmperson!=0">
+				and confirmperson=#{expense.confirmperson}
+			</if>			
+		</where>
+	</sql>
+
+	<!-- expenseid,addtime,empid,total,reason,confirmperson,state,sugstate,suggestion,sugtime -->
+
+	<!-- 新增 -->
+	<!-- 获取自增长的值: useGeneratedKeys="" keyProperty="" keyColumn="" -->
+	<insert id="insert" parameterType="com.as.domain.Expense" useGeneratedKeys="true" keyColumn="expenseid" keyProperty="expenseid">
+		insert into expense
+		(empid,total,reason,confirmperson)
+		values
+		(#{empid},#{total},#{reason},#{confirmperson})
+	</insert>
+
+	<!-- 删除 -->
+	<delete id="delete" parameterType="int">
+		delete from expense where
+		expenseid=#{expenseid}
+	</delete>
+
+	<!-- 修改我的报销单信息 -->
+	<update id="update" parameterType="com.as.domain.Expense">
+		update expense set
+		addtime=now(),total=#{total},reason=#{reason},confirmperson=#{confirmperson}
+		where expenseid=#{expenseid}
+	</update>
+
+	<!-- 分页条件查询 -->
+	<select id="select" resultType="com.as.domain.Expense">
+		select * from viewexpense
+		<include refid="share_sql"></include>
+		order by addtime desc
+		<if test="skip>=0">
+			limit #{skip},#{take}
+		</if>
+	</select>
+
+	<!-- 获取记录条数 -->
+	<select id="getRowCount" resultType="int"
+		parameterType="com.as.domain.Expense">
+		select count(*) from viewexpense
+		<include refid="share_sql"></include>
+	</select>
+
+	<!-- 根据id查询 -->
+	<select id="selectOne" resultType="com.as.domain.Expense"
+		parameterType="int">
+		select * from viewexpense where expenseid=#{expenseid}
+	</select>
+	
+	<!-- 提交单据:修改状态 -->
+	<update id="updateState" parameterType="int">
+		update expense set state=2
+		where expenseid=#{expenseid}
+	</update>
+	
+	<!-- 审批单据 -->
+	<update id="approve" parameterType="com.as.domain.Expense">
+		update expense set state=3,sugstate=#{sugstate},suggestion=#{suggestion},sugtime=now()
+		where expenseid=#{expenseid}
+	</update>
+
+
+</mapper> 

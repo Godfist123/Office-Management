@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.as.dao.ExpenseTypeMapper">
+
+	<!-- 两个以上参数省略parameterType -->
+	<!-- scheduleid,addtime,title,empid,begintime,endtime,content,concatname,address,tel,demo,ifprivate,state -->
+
+	<!-- sql片段：可提取公共部分,利于代码重用 -->
+	<sql id="share_sql">
+		<where>
+			<if test="expenseType.extypename!=null and expenseType.extypename!=''">
+				and extypename like concat('%',{ExpenseType.extypename},'%')
+			</if>
+		</where>
+	</sql>
+
+	<!-- extypeid,addtime,empid,total,reason,confirmperson,state,sugstate,suggestion,sugtime -->
+
+	<!-- 新增 -->
+	<!-- 获取自增长的值: useGeneratedKeys="true" keyProperty="empid" keyColumn="empid" -->
+	<insert id="insert" parameterType="String">
+		insert into ExpenseType (extypename) 
+		values (#{extypename})
+	</insert>
+
+	<!-- 删除 -->
+	<delete id="delete" parameterType="int">
+		delete from ExpenseType where
+		extypeid=#{extypeid}
+	</delete>
+
+	<!-- 修改 -->
+	<update id="update" parameterType="com.as.domain.ExpenseType">
+		update ExpenseType set extypename=#{extypename}
+		where extypeid=#{extypeid}
+	</update>
+
+	<!-- 分页条件查询 -->
+	<select id="select" resultType="com.as.domain.ExpenseType">
+		select * from ExpenseType
+		<include refid="share_sql"></include>
+		<if test="skip>=0">
+			limit #{skip},#{take}
+		</if>
+	</select>
+
+	<!-- 获取记录条数 -->
+	<select id="getRowCount" resultType="int"
+		parameterType="com.as.domain.ExpenseType">
+		select count(*) from ExpenseType
+		<include refid="share_sql"></include>
+	</select>
+
+	<!-- 根据id查询 -->
+	<select id="selectOne" resultType="com.as.domain.ExpenseType"
+		parameterType="int">
+		select * from ExpenseType where extypeid=#{extypeid}
+	</select>
+
+	<!-- 批量删除 -->
+	<delete id="deleteAll" parameterType="int[]">
+		delete from ExpenseType where extypeid in
+		<foreach collection="extypeids" item="extypeid" open="("
+			close=")" separator=",">
+			#{extypeid}
+		</foreach>
+	</delete>
+	
+
+</mapper> 

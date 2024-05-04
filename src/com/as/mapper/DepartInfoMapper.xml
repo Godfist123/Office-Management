@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.as.dao.DepartInfoMapper">
+
+	<!-- 两个以上参数省略parameterType -->
+
+
+	<!-- sql片段：可提取公共部分,利于代码重用 -->
+	<sql id="share_sql">
+		<where>
+			<if
+				test="DepartInfo.departName!=null and DepartInfo.departName!=''">
+				and departName like concat('%',#{DepartInfo.departName},'%')
+			</if>
+			<if test="DepartInfo.departTel!=null and DepartInfo.departTel!=''">
+				and departTel like concat('%',#{DepartInfo.departTel},'%')
+			</if>
+		</where>
+	</sql>
+
+	<!-- 新增 -->
+	<insert id="insert" parameterType="com.as.domain.DepartInfo">
+		insert into DepartInfo (departName,departEmail,departTel,departDesc) values
+		(#{departName},#{departEmail},#{departTel},#{departDesc})
+	</insert>
+
+	<!-- 删除 -->
+	<delete id="delete" parameterType="int">
+		delete from DepartInfo where departId=#{departId}
+	</delete>
+
+	<!-- 修改 -->
+	<update id="update" parameterType="com.as.domain.DepartInfo">
+		update DepartInfo set
+		departName=#{departName},departEmail=#{departEmail},departTel=#{departTel},departDesc=#{departDesc}
+		<where>
+			departId=#{departId}
+		</where>
+	</update>
+
+	<!-- 分页条件查询 -->
+	<select id="select" resultType="com.as.domain.DepartInfo">
+		select * from DepartInfo
+		<include refid="share_sql"></include>
+		<if test="skip>=0">
+			limit #{skip},#{take}		
+		</if>
+	</select>
+
+	<!-- 获取记录数 -->
+	<select id="getRowCount" resultType="int"
+		parameterType="com.as.domain.DepartInfo">
+		select count(*) from DepartInfo
+		<include refid="share_sql"></include>
+	</select>
+
+	<!-- 根据id查询 -->
+	<select id="selectById" parameterType="int"
+		resultType="com.as.domain.DepartInfo">
+		select * from DepartInfo where departId=#{departId}
+	</select>
+	
+	<!-- 批量删除 -->
+		<!-- 参数是数组,也可写成int,integer -->
+		<!-- 拼出的sql语句是: delete from DepartInfo where departId in(数组中每一个数,用","分割) -->
+		<!-- 	collection="departIds"  要循环的数组  -->
+		<!-- 	item="departId"         每次从数组中取变量的值 -->
+		<!-- 	open="("                以 "(" 开始 -->
+		<!-- 	close=")"               以 ")" 结束-->
+		<!-- 	separator=","           值之间以 "," 分割 -->
+	<delete id="deleteAll" parameterType="int[]"> 
+		delete from DepartInfo where departId in
+		<foreach collection="departIds" item="departId" open="(" close=")" separator=",">
+			#{departId}
+		</foreach>
+	</delete>
+
+</mapper> 

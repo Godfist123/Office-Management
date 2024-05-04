@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.as.dao.EmployeeMapper">
+
+	<!-- 两个以上参数省略parameterType -->
+
+
+	<!-- sql片段：可提取公共部分,利于代码重用 -->
+	<sql id="share_sql">
+		<where>
+			<if test="employee.empName!=null and employee.empName!=''">
+				and empName like concat('%',#{employee.empName},'%')
+			</if>
+			<if test="employee.loginName!=null and employee.loginName!=''">
+				and loginName like concat('%',#{employee.loginName},'%')
+			</if>
+			<if test="employee.position!=null and employee.position!=''">
+				and position like concat('%',#{employee.position},'%')
+			</if>
+			<if test="employee.departId!=null and employee.departId!=0">
+				and departId=#{employee.departId}
+			</if>
+			<if test="employee.state!=null and employee.state!=0">
+				and state=#{employee.state}
+			</if>
+		</where>
+	</sql>
+
+	<!-- 新增 -->
+	<insert id="insert" parameterType="com.as.domain.Employee"
+		useGeneratedKeys="true" keyProperty="empId" keyColumn="empId">
+		insert into
+		employee(empName,gender,password,position,loginName,hireDate,departId,mobile,tel,familyTel,birthday,address,remark,picture
+		)
+		values(#{empName},#{gender},#{password},#{position},#{loginName},#{hireDate},#{departId},#{mobile},#{tel},#{familyTel},#{birthday},#{address},#{remark},#{picture})
+	</insert>
+
+	<!-- 删除 -->
+	<delete id="delete" parameterType="int">
+		delete from employee where
+		empId=#{empId}
+	</delete>
+
+	<!-- 修改 -->
+	<update id="update">
+		update employee set
+		empName=#{empName},
+		gender=#{gender},
+		password=#{password},
+		position=#{position},
+		loginName=#{loginName},
+		hireDate=#{hireDate},
+		departId=#{departId},
+		mobile=#{mobile},
+		tel=#{tel},
+		familyTel=#{familyTel},
+		birthday=#{birthday},
+		address=#{address},
+		remark=#{remark}
+		<if test="picture!=''and picture!=null">
+			,picture=#{picture}
+		</if>
+		where empId=#{empId}
+	</update>
+
+	<!-- 分页条件查询 -->
+	<select id="select" resultType="com.as.domain.Employee">
+		select * from viewEmployee
+		<include refid="share_sql"></include>
+		order by addtime desc
+		<if test="skip>=0">
+			limit #{skip},#{take}
+		</if>
+	</select>
+
+	<!-- 获取记录数 -->
+	<select id="getRowCount" resultType="int"
+		parameterType="com.as.domain.Employee">
+		select count(*) from viewEmployee
+		<include refid="share_sql"></include>
+	</select>
+
+	<!-- 根据id查询 -->
+	<select id="selectById" resultType="com.as.domain.Employee"
+		parameterType="int">
+		select * from viewEmployee where empId=#{empId}
+	</select>
+
+	<!-- 批量删除 -->
+	<delete id="deleteAll" parameterType="int[]">
+		delete from employee where empId in
+		<foreach collection="empIds " item="empId" open="(" close=")"
+			separator=",">
+			#{empId}
+		</foreach>
+	</delete>
+
+	<!-- 登录 -->
+	<select id="login" resultType="com.as.domain.Employee">
+		select * from employee where
+		loginName=#{loginName} and password=#{password}
+	</select>
+
+	<!-- 查询去重后的职位 -->
+	<select id="listPosition" resultType="com.as.domain.Employee"
+		parameterType="com.as.domain.Employee">
+		select distinct position from employee
+	</select>
+	
+	<!-- 修改密码 -->
+	<update id="updatePassword">
+		update employee set password=#{password} where empId=#{empId}
+	</update>
+
+	<!-- 修改状态 -->
+	<update id="updateState">
+		update employee set state=if(state=1,2,1) where empId=#{empId}
+	</update>
+
+</mapper> 
